@@ -43,7 +43,7 @@ func main() {
 		log.Fatalln("provide error: ", err)
 	}
 
-	err = di.Invoke(func(args ...interface{}) error {
+	err = di.Invoke(func() error {
 		log.Println("service has run")
 		return nil
 	})
