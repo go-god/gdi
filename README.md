@@ -19,20 +19,52 @@ import (
 	"github.com/go-god/gdi/factory"
 )
 
+type service struct {
+	App    string
+	Config *appConfig `inject:""`
+}
+
+// AppConfig app config
+type appConfig struct {
+	Name string
+}
+
+// New create server entry
+func New() *service {
+	return &service{}
+}
+
+func createConfig(name string) *appConfig {
+	return &appConfig{
+		Name: name,
+	}
+}
+
+func (s *service) GetConfig() *appConfig {
+	return s.Config
+}
+
 func main() {
 	di := factory.CreateDI(factory.FbInject)
-	// fn is func or interface
-	err := di.Provide(gdi.Object{Value: fn})
+
+	err := di.Provide(
+		&gdi.Object{Value: New()},
+		&gdi.Object{Value: createConfig("gdi-demo")},
+	)
 	if err != nil {
-		log.Fatalln("provide error: ",err)
+		log.Fatalln("provide error: ", err)
 	}
-	
-	err = di.Invoke()
-	if err != nil{
+
+	err = di.Invoke(func(args ...interface{}) error {
+		log.Println("service has run")
+		return nil
+	})
+
+	if err != nil {
 		log.Fatalln("invoke error: ", err)
-    }
-    
-    // some code...
+	}
+
+	// some code...
 }
 
 ```
@@ -47,24 +79,65 @@ import (
 	"github.com/go-god/gdi/factory"
 )
 
+type service struct {
+	App     string
+	Config  *appConfig `inject:""`
+	digInfo digInfo
+}
+
+type digInfo struct {
+	app string
+}
+
+// AppConfig app config
+type appConfig struct {
+	Name string
+}
+
+// New create server entry
+func New() *service {
+	return &service{}
+}
+
+func createConfig() *appConfig {
+	return &appConfig{
+		Name: "dig-inject-demo",
+	}
+}
+
+func createAbc(conf *appConfig) *digInfo {
+	return &digInfo{
+		app: conf.Name,
+	}
+}
+
+func (s *service) GetConfig() *appConfig {
+	return s.Config
+}
+
 func main() {
 	di := factory.CreateDI(factory.DigInject)
-	// fn is func or interface
-	err := di.Provide(gdi.Object{Value: fn})
+
+	err := di.Provide(
+		&gdi.Object{Value: New},
+		&gdi.Object{Value: createConfig},
+		&gdi.Object{Value: createAbc},
+	)
 	if err != nil {
 		log.Fatalln("provide error: ", err)
 	}
-	
-	err = di.Invoke(func() {
-		// start service...
-    })
-	if err != nil{
-		log.Fatalln("invoke error: ",err)
-    }
-    
-    // some code...
-}
 
+	err = di.Invoke(func(args ...interface{}) error {
+		log.Println("service has run")
+		return nil
+	})
+
+	if err != nil {
+		log.Fatalln("invoke error: ", err)
+	}
+
+	// some code...
+}
 ```
 
 # Dependency injection framework

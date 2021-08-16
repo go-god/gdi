@@ -43,7 +43,7 @@ func (di *injectImpl) Invoke(values ...interface{}) error {
 	}
 
 	for _, fn := range values {
-		if callback, ok := fn.(func() error); ok {
+		if callback, ok := fn.(func(args ...interface{}) error); ok {
 			err = callback()
 			if err != nil {
 				return err
